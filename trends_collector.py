@@ -100,7 +100,7 @@ def fetch_timeframe(queries, timeframe, retries=4):
     last = None
     for attempt in range(retries):
         try:
-            py = TrendReq(hl=HL, tz=TZ_OFFSET, timeout=(10, 30), retries=2, backoff_factor=0.4)
+            py = TrendReq(hl=HL, tz=TZ_OFFSET, timeout=(10, 30))
             py.build_payload(kw_list=queries, timeframe=timeframe, geo=GEO)
             return py.interest_over_time()
         except Exception as e:  # noqa

@@ -26,7 +26,7 @@ jobs:
           python-version: "3.11"
 
       - name: Install deps
-        run: pip install --upgrade pytrends pandas
+        run: pip install --upgrade pytrends pandas "urllib3<2"
 
       - name: Collect & push trends
         env:
