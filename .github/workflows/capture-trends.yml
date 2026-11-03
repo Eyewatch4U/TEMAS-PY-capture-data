@@ -1,0 +1,40 @@
+# .github/workflows/capture-trends.yml
+# Colector de Google Trends -> worker Monitor Temas de Interés · Paraguay (NSGroup)
+# Corre en el self-hosted runner (IP propia = menos bloqueos de Google Trends).
+name: Capture Google Trends (Temas PY)
+
+on:
+  schedule:
+    - cron: "17 */6 * * *"   # cada 6 horas (Trends se actualiza lento; evita 429)
+  workflow_dispatch: {}       # ejecución manual desde la pestaña Actions
+
+concurrency:
+  group: trends-temas-py
+  cancel-in-progress: false
+
+jobs:
+  trends:
+    runs-on: self-hosted
+    timeout-minutes: 15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install deps
+        run: pip install --upgrade pytrends pandas
+
+      - name: Collect & push trends
+        env:
+          WORKER_BASE_URL: ${{ secrets.WORKER_BASE_URL }}
+          SYNC_TOKEN: ${{ secrets.SYNC_TOKEN }}
+          TRENDS_GEO: "PY"
+          TRENDS_HL: "es-PY"
+          TRENDS_TZ: "180"
+          # Opcional: sobrescribir keywords -> "label=query;label=query"
+          # TRENDS_KEYWORDS: "BCP=BCP;Dólar=dólar;Combustible=combustible;Presupuesto=presupuesto"
+        run: python trends_collector.py
