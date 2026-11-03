@@ -1,6 +1,6 @@
 # .github/workflows/capture-trends.yml
 # Colector de Google Trends -> worker Monitor Temas de Interés · Paraguay (NSGroup)
-# Corre en el self-hosted runner (IP propia = menos bloqueos de Google Trends).
+# Corre en runner de GitHub (ubuntu-latest), igual que el capture de Meltwater.
 name: Capture Google Trends (Temas PY)
 
 on:
@@ -14,7 +14,7 @@ concurrency:
 
 jobs:
   trends:
-    runs-on: self-hosted
+    runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
       - name: Checkout
