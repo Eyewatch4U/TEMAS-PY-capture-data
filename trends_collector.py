@@ -115,35 +115,37 @@ def fetch_timeframe(queries, timeframe, retries=4):
     sys.stderr.write(f"[trends] {timeframe} agotó reintentos: {last}\n")
     return None  # best-effort: no corta el resto
 
-# --- Búsquedas relacionadas EN ASCENSO (rising) de las últimas 24h, por término
+# --- Búsquedas relacionadas EN ASCENSO (rising) de las últimas 24h, por término.
+# IMPORTANTE: se consulta CADA búsqueda por separado. En una sola consulta
+# comparada, Google suele devolver "rising" sólo para el término dominante
+# (p.ej. Dólar) y vacío para el resto; término por término cada uno trae lo suyo.
 def fetch_related(keywords, retries=4):
+    import random
     from pytrends.request import TrendReq
-    queries = [q for (_l, q) in keywords]
-    last = None
-    for attempt in range(retries):
-        try:
-            py = TrendReq(hl=HL, tz=TZ_OFFSET, timeout=(10, 30))
-            py.build_payload(kw_list=queries, timeframe="now 1-d", geo=GEO)
-            rq = py.related_queries()  # {query: {'top': df, 'rising': df}}
-            out = {}
-            for (label, query) in keywords:
+    out = {}
+    for (label, query) in keywords:
+        items = []
+        for attempt in range(retries):
+            try:
+                py = TrendReq(hl=HL, tz=TZ_OFFSET, timeout=(10, 30))
+                py.build_payload(kw_list=[query], timeframe="now 1-d", geo=GEO)
+                rq = py.related_queries()  # {query: {'top': df, 'rising': df}}
                 d = (rq or {}).get(query) or {}
                 rising = d.get("rising")
-                items = []
                 if rising is not None and not getattr(rising, "empty", True):
                     for _, row in rising.iterrows():
                         q = str(row.get("query", "")).strip()
                         if q:
                             items.append({"query": q, "value": int(row.get("value", 0) or 0)})
-                out[label] = items[:10]
-            return out
-        except Exception as e:  # noqa
-            last = e
-            wait = _wait(attempt, "429" in str(e))
-            sys.stderr.write(f"[trends] related intento {attempt+1} falló: {e} · reintento en {wait}s\n")
-            time.sleep(wait)
-    sys.stderr.write(f"[trends] related agotó reintentos: {last}\n")
-    return {}
+                break  # ok (aunque venga vacío, no reintentar)
+            except Exception as e:  # noqa
+                wait = _wait(attempt, "429" in str(e))
+                sys.stderr.write(f"[trends] related {label} intento {attempt+1} falló: {e} · reintento en {wait}s\n")
+                time.sleep(wait)
+        out[label] = items[:10]
+        sys.stderr.write(f"[trends] related {label}: {len(out[label])} items\n")
+        time.sleep(6 + random.randint(0, 6))  # pausa entre términos
+    return out
 
 def build_payload():
     import random
