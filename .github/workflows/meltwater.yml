@@ -1,0 +1,74 @@
+name: Capture TEMAS PY
+
+on:
+  # Cron externo (cron-job.org) dispara cada 30 min vía workflow_dispatch.
+  workflow_dispatch:
+
+# Solo una ejecución a la vez (evita solapamientos)
+concurrency:
+  group: temas-py-capture
+  cancel-in-progress: false
+
+# Permisos para que el step de debug pueda hacer push de logs
+permissions:
+  contents: write
+
+jobs:
+  capture:
+    name: Capturar y enviar a Make.com
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Setup Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Instalar Playwright + Chromium
+        run: |
+          pip install playwright==1.47.0
+          playwright install chromium --with-deps
+
+      - name: Ejecutar capture
+        env:
+          # URL del reporte público de Meltwater (Temas de Interés · Paraguay).
+          MELTWATER_URL: ${{ secrets.MELTWATER_URL }}
+          # Contraseña del reporte público (si tiene gate).
+          MELTWATER_PASSWORD: ${{ secrets.MELTWATER_PASSWORD }}
+          # Webhook de Make (TEMAS-PY-DATA): siempre por secret.
+          MAKE_WEBHOOK_URL: ${{ secrets.MAKE_WEBHOOK_URL }}
+        run: |
+          mkdir -p debug_output
+          python capture_meltwater.py 2>&1 | tee debug_output/full_log.txt
+          exit ${PIPESTATUS[0]}
+
+      - name: Commit debug log to repo (on failure)
+        if: failure()
+        run: |
+          if [ -d debug_output ]; then
+            echo "=== Pushing debug files to repo ==="
+            for f in debug_output/*; do
+              if [ -f "$f" ] && [ $(stat -c%s "$f") -gt 100000 ]; then
+                head -c 100000 "$f" > "$f.trunc" && mv "$f.trunc" "$f"
+              fi
+            done
+            rm -f debug_output/final.png
+            git config user.email "actions@github.com"
+            git config user.name "github-actions[bot]"
+            rm -rf latest_failure
+            mkdir -p latest_failure
+            cp -r debug_output/* latest_failure/ 2>/dev/null || true
+            git add latest_failure/
+            git commit -m "debug: failure $(date -u +%Y-%m-%dT%H:%M:%SZ)" || echo "(nothing to commit)"
+            git pull --rebase origin main || true
+            git push
+            echo "=== Debug pushed to latest_failure/ ==="
+          fi
+
+      - name: Resultado
+        if: always()
+        run: echo "Ejecución finalizada a las $(date -u '+%Y-%m-%d %H:%M:%S') UTC"
