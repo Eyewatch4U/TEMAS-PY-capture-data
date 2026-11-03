@@ -94,7 +94,11 @@ def df_to_points(df, keywords):
         points.append({"d": iso, "v": v})
     return points
 
-# --- pytrends con reintentos -------------------------------------------------
+def _wait(attempt, is429):
+    import random
+    return min(150, (40 if is429 else 20) * (attempt + 1) + random.randint(0, 12))
+
+# --- pytrends con reintentos (best-effort: devuelve None si no pudo) ----------
 def fetch_timeframe(queries, timeframe, retries=4):
     from pytrends.request import TrendReq
     last = None
@@ -105,12 +109,44 @@ def fetch_timeframe(queries, timeframe, retries=4):
             return py.interest_over_time()
         except Exception as e:  # noqa
             last = e
-            wait = 20 * (attempt + 1)
+            wait = _wait(attempt, "429" in str(e))
             sys.stderr.write(f"[trends] {timeframe} intento {attempt+1} falló: {e} · reintento en {wait}s\n")
             time.sleep(wait)
-    raise RuntimeError(f"pytrends agotó reintentos en {timeframe}: {last}")
+    sys.stderr.write(f"[trends] {timeframe} agotó reintentos: {last}\n")
+    return None  # best-effort: no corta el resto
+
+# --- Búsquedas relacionadas EN ASCENSO (rising) de las últimas 24h, por término
+def fetch_related(keywords, retries=4):
+    from pytrends.request import TrendReq
+    queries = [q for (_l, q) in keywords]
+    last = None
+    for attempt in range(retries):
+        try:
+            py = TrendReq(hl=HL, tz=TZ_OFFSET, timeout=(10, 30))
+            py.build_payload(kw_list=queries, timeframe="now 1-d", geo=GEO)
+            rq = py.related_queries()  # {query: {'top': df, 'rising': df}}
+            out = {}
+            for (label, query) in keywords:
+                d = (rq or {}).get(query) or {}
+                rising = d.get("rising")
+                items = []
+                if rising is not None and not getattr(rising, "empty", True):
+                    for _, row in rising.iterrows():
+                        q = str(row.get("query", "")).strip()
+                        if q:
+                            items.append({"query": q, "value": int(row.get("value", 0) or 0)})
+                out[label] = items[:10]
+            return out
+        except Exception as e:  # noqa
+            last = e
+            wait = _wait(attempt, "429" in str(e))
+            sys.stderr.write(f"[trends] related intento {attempt+1} falló: {e} · reintento en {wait}s\n")
+            time.sleep(wait)
+    sys.stderr.write(f"[trends] related agotó reintentos: {last}\n")
+    return {}
 
 def build_payload():
+    import random
     keywords = load_keywords()
     queries = [q for (_l, q) in keywords]
     if len(queries) > 5:
@@ -118,19 +154,25 @@ def build_payload():
     periods = {}
     for pk, tf in TIMEFRAMES.items():
         df = fetch_timeframe(queries, tf)
-        pts = df_to_points(df, keywords)
+        pts = df_to_points(df, keywords) if df is not None else []
         if pts:
             periods[pk] = {"points": pts}
-        # pausa corta entre consultas para no gatillar 429
-        time.sleep(8)
-    if not periods:
-        raise SystemExit("Trends no devolvió datos en ningún período.")
-    return {
+            sys.stderr.write(f"[trends] {pk} OK ({len(pts)} puntos)\n")
+        time.sleep(10 + random.randint(0, 8))  # pausa con jitter para no gatillar 429
+    related = fetch_related(keywords)
+    nrel = sum(len(v) for v in related.values())
+    sys.stderr.write(f"[trends] relacionados en ascenso: {nrel} items\n")
+    if not periods and not related:
+        raise SystemExit("Trends no devolvió datos (probable 429 de Google).")
+    out = {
         "ts": int(time.time() * 1000),
         "geo": GEO,
         "terms": [{"key": l, "label": l} for (l, _q) in keywords],
         "periods": periods,
     }
+    if related:
+        out["related"] = related
+    return out
 
 # --- POST al worker ----------------------------------------------------------
 def post_to_worker(payload):
