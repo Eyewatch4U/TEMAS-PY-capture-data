@@ -5,7 +5,7 @@ name: Capture Google Trends (Temas PY)
 
 on:
   schedule:
-    - cron: "17 */6 * * *"   # cada 6 horas (Trends se actualiza lento; evita 429)
+    - cron: "17 */2 * * *"   # cada 2 horas
   workflow_dispatch: {}       # ejecución manual desde la pestaña Actions
 
 concurrency:
