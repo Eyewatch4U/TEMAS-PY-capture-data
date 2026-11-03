@@ -140,6 +140,10 @@ def post_to_worker(payload):
     body = json.dumps(payload).encode("utf-8")
     req = urllib.request.Request(url, data=body, method="POST", headers={
         "Content-Type": "application/json",
+        "Accept": "application/json",
+        # Cloudflare delante del worker rechaza con 403 el User-Agent por defecto
+        # de urllib ("Python-urllib/..."). Identificamos el cliente para evitarlo.
+        "User-Agent": "NSG-Trends-Collector/1.0 (+Eyewatch Intelligence Unit)",
         "x-sync-token": SYNC_TOKEN,
     })
     with urllib.request.urlopen(req, timeout=40) as r:
