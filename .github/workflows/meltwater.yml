@@ -15,7 +15,7 @@ permissions:
 
 jobs:
   capture:
-    name: Capturar y enviar a Make.com
+    name: Capturar y enviar al worker
     runs-on: ubuntu-latest
     timeout-minutes: 8
 
@@ -39,8 +39,9 @@ jobs:
           MELTWATER_URL: ${{ secrets.MELTWATER_URL }}
           # Contraseña del reporte público (si tiene gate).
           MELTWATER_PASSWORD: ${{ secrets.MELTWATER_PASSWORD }}
-          # Webhook de Make (TEMAS-PY-DATA): siempre por secret.
-          MAKE_WEBHOOK_URL: ${{ secrets.MAKE_WEBHOOK_URL }}
+          # URL del worker (/ingest): siempre por secret.
+          WORKER_INGEST_URL: ${{ secrets.WORKER_INGEST_URL }}
+          SYNC_TOKEN: ${{ secrets.SYNC_TOKEN || 'MAKE2026PY' }}
         run: |
           mkdir -p debug_output
           python capture_meltwater.py 2>&1 | tee debug_output/full_log.txt
