@@ -257,7 +257,17 @@ def post_to_worker(data: dict) -> int:
     payload = json.dumps(data).encode("utf-8")
     req = urllib.request.Request(
         WORKER_INGEST_URL, data=payload,
-        headers={"Content-Type": "application/json", "x-sync-token": SYNC_TOKEN},
+        headers={
+            "Content-Type": "application/json",
+            "x-sync-token": SYNC_TOKEN,
+            # Cloudflare (en el borde del worker) banea el User-Agent por
+            # defecto de urllib ("Python-urllib/...") con 403 code 1010.
+            # Mandamos UA de navegador + Accept, como en el colector de Trends.
+            "User-Agent": ("Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
+                           "AppleWebKit/537.36 (KHTML, like Gecko) "
+                           "Chrome/120.0.0.0 Safari/537.36"),
+            "Accept": "application/json, text/plain, */*",
+        },
         method="POST",
     )
     try:
