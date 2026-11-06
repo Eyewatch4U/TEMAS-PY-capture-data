@@ -1,0 +1,11 @@
+403 https://app.meltwater.com/report/public/THA8FbMECFfxW2rwA34AqMP4/snapshot
+404 https://app.meltwater.com/report/public/THA8FbMECFfxW2rwA34AqMP4/snapshot
+404 https://app.meltwater.com/report/public/THA8FbMECFfxW2rwA34AqMP4/snapshot
+404 https://app.meltwater.com/report/public/THA8FbMECFfxW2rwA34AqMP4/snapshot
+404 https://app.meltwater.com/report/public/THA8FbMECFfxW2rwA34AqMP4/snapshot
+404 https://app.meltwater.com/report/public/THA8FbMECFfxW2rwA34AqMP4/snapshot
+200 https://app.meltwater.com/report/public/THA8FbMECFfxW2rwA34AqMP4/snapshot
+200 https://app.meltwater.com/report/public/THA8FbMECFfxW2rwA34AqMP4/snapshot
+308 https://app.meltwater.com/a/shareable-reports/?report_id=THA8FbMECFfxW2rwA34AqMP4&interaction=true&tab=0&snapshot_token=
+200 https://app.meltwater.com/a/shareable-reports?report_id=THA8FbMECFfxW2rwA34AqMP4&interaction=true&tab=0&snapshot_token=S
+200 https://app.meltwater.com/report/public/THA8FbMECFfxW2rwA34AqMP4/insight-pages/snapshot?snapshot_token=S1M3BZ9kZ3crcq9wA

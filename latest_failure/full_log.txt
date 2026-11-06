@@ -1,0 +1,13 @@
+→ Navegando a Meltwater...
+  page.url = https://app.meltwater.com/report/public/THA8FbMECFfxW2rwA34AqMP4/snapshot
+  page.title = Generating
+→ Password gate detectado, enviando passcode...
+  Post-reload: Generating
+→ Esperando .gz (hasta 300s, sin recargas agresivas)...
+✓ URL .gz detectada
+  señal=838435  size=8998616B
+✓ Snapshot CON datos (señal=838435).
+→ POST directo al worker /ingest ...
+✗ Worker HTTP 403: error code: 1010
+
+El worker devolvió status inesperado: 403
