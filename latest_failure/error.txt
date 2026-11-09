@@ -1,0 +1,33 @@
+No se obtuvo un .gz con datos en 300s tras 158 responses.
+Últimos estados del endpoint snapshot:
+404 https://app.meltwater.com/report/public/THA8FbMECFfxW2rwA34AqMP4/snapshot
+404 https://app.meltwater.com/report/public/THA8FbMECFfxW2rwA34AqMP4/snapshot
+404 https://app.meltwater.com/report/public/THA8FbMECFfxW2rwA34AqMP4/snapshot
+404 https://app.meltwater.com/report/public/THA8FbMECFfxW2rwA34AqMP4/snapshot
+404 https://app.meltwater.com/report/public/THA8FbMECFfxW2rwA34AqMP4/snapshot
+404 https://app.meltwater.com/report/public/THA8FbMECFfxW2rwA34AqMP4/snapshot
+200 https://app.meltwater.com/report/public/THA8FbMECFfxW2rwA34AqMP4/snapshot
+200 https://app.meltwater.com/report/public/THA8FbMECFfxW2rwA34AqMP4/snapshot
+308 https://app.meltwater.com/a/shareable-reports/?report_id=THA8FbMECFfxW2rwA34AqMP4&interaction=true&tab=0&snapshot_token=
+200 https://app.meltwater.com/a/shareable-reports?report_id=THA8FbMECFfxW2rwA34AqMP4&interaction=true&tab=0&snapshot_token=0
+502 persistente = Meltwater bloquea la IP de salida (datacenter). Correr en self-hosted runner (IP residencial) o con PROXY_URL residencial.
+
+Traceback (most recent call last):
+  File "/home/runner/work/TEMAS-PY-capture-data/TEMAS-PY-capture-data/capture_meltwater.py", line 291, in main
+    gz_url, data = await capture_gz_url()
+                   ^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/work/TEMAS-PY-capture-data/TEMAS-PY-capture-data/capture_meltwater.py", line 245, in capture_gz_url
+    raise RuntimeError(
+RuntimeError: No se obtuvo un .gz con datos en 300s tras 158 responses.
+Últimos estados del endpoint snapshot:
+404 https://app.meltwater.com/report/public/THA8FbMECFfxW2rwA34AqMP4/snapshot
+404 https://app.meltwater.com/report/public/THA8FbMECFfxW2rwA34AqMP4/snapshot
+404 https://app.meltwater.com/report/public/THA8FbMECFfxW2rwA34AqMP4/snapshot
+404 https://app.meltwater.com/report/public/THA8FbMECFfxW2rwA34AqMP4/snapshot
+404 https://app.meltwater.com/report/public/THA8FbMECFfxW2rwA34AqMP4/snapshot
+404 https://app.meltwater.com/report/public/THA8FbMECFfxW2rwA34AqMP4/snapshot
+200 https://app.meltwater.com/report/public/THA8FbMECFfxW2rwA34AqMP4/snapshot
+200 https://app.meltwater.com/report/public/THA8FbMECFfxW2rwA34AqMP4/snapshot
+308 https://app.meltwater.com/a/shareable-reports/?report_id=THA8FbMECFfxW2rwA34AqMP4&interaction=true&tab=0&snapshot_token=
+200 https://app.meltwater.com/a/shareable-reports?report_id=THA8FbMECFfxW2rwA34AqMP4&interaction=true&tab=0&snapshot_token=0
+502 persistente = Meltwater bloquea la IP de salida (datacenter). Correr en self-hosted runner (IP residencial) o con PROXY_URL residencial.
